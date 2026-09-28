@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sur-postgres
+    environment:
+      POSTGRES_USER: sur
+      POSTGRES_PASSWORD: sur_secret
+      POSTGRES_DB: sur_payments
+    ports:
+      - "5432:5432"
+    volumes:
+      - sur_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sur -d sur_payments"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:alpine
+    container_name: sur-redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  sur_pg_data:
