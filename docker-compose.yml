@@ -22,5 +22,42 @@ services:
     ports:
       - "6379:6379"
 
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: sur-api
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: postgres://sur:sur_secret@postgres:5432/sur_payments
+      REDIS_URL: redis://redis:6379
+      PORT: 4000
+      HOST: 0.0.0.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - ./apps/api:/app
+      - /app/node_modules
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: sur-web
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+    depends_on:
+      - api
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+      - /app/.next
+
 volumes:
   sur_pg_data:
